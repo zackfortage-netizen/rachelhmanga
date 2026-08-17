@@ -32,6 +32,8 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #1e293b;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
         .header-left {
@@ -65,7 +67,41 @@
             border: 2px solid #38bdf8;
         }
 
-        /* NÚT SUPPORT ME Ở GÓC TRÊN BÊN PHẢI (TRONG HEADER) */
+        /* KHUNG TÌM KIẾM Ở HEADER */
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 380px;
+            min-width: 200px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.55rem 1rem 0.55rem 2.4rem;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            color: #f1f5f9;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.25);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* NÚT SUPPORT ME Ở GÓC TRÊN BÊN PHẢI */
         .support-btn {
             display: inline-flex;
             align-items: center;
@@ -77,6 +113,7 @@
             font-weight: 600;
             font-size: 0.9rem;
             transition: background-color 0.2s, transform 0.2s;
+            white-space: nowrap;
         }
 
         .support-btn:hover {
@@ -401,10 +438,15 @@
             </a>
         </div>
 
+        <!-- Ô TÌM KIẾM TRUYỆN THEO TÊN -->
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchInput" placeholder="Search manga by title..." oninput="filterManga()">
+        </div>
+
         <div class="user-actions">
             <!-- NÚT SUPPORT ME Ở GÓC TRÊN BÊN PHẢI -->
-            <a href="https://www.patreon.com/cw/rachelanimation" target="_blank" rel="noopener noreferrer"
-                class="support-btn" id="patreonLink">
+            <a href="https://www.patreon.com/cw/rachelanimation" target="_blank" rel="noopener noreferrer" class="support-btn" id="patreonLink">
                 Support me
             </a>
             <div id="userActions"></div>
@@ -427,8 +469,7 @@
                     <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
                         <div class="input-group" style="flex: 1; min-width: 250px; margin-bottom:0;">
                             <label>Enter Patreon / Support URL</label>
-                            <input type="url" id="patreonUrlInput"
-                                placeholder="https://www.patreon.com/cw/rachelanimation">
+                            <input type="url" id="patreonUrlInput" placeholder="https://www.patreon.com/cw/rachelanimation">
                         </div>
                         <button type="submit" id="btnUpdatePatreon" class="btn-submit"
                             style="width: auto; padding: 0.75rem 1.5rem;">
@@ -800,12 +841,27 @@
                 snapshot.forEach((doc) => {
                     mangaList.push({id: doc.id, ...doc.data()});
                 });
+                window.currentMangaCache = mangaList;
                 renderAdminTable(mangaList);
-                renderMangaGrid(mangaList);
+                filterManga(); // Áp dụng bộ lọc tìm kiếm nếu đang gõ
             }, (error) => {
                 console.error("Firestore connection error:", error);
                 document.getElementById('mangaGrid').innerHTML = '<div class="empty-state">⚠️ Please make sure Rules (access permissions) are enabled in Firestore Console.</div>';
             });
+        }
+
+        /* HÀM LỌC TRUYỆN THEO TÊN */
+        function filterManga() {
+            const query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+            const allManga = window.currentMangaCache || [];
+            
+            if (!query) {
+                renderMangaGrid(allManga);
+                return;
+            }
+
+            const filtered = allManga.filter(m => (m.title || '').toLowerCase().includes(query));
+            renderMangaGrid(filtered, query);
         }
 
         function renderAdminTable(mangaList) {
@@ -833,10 +889,14 @@
             `}).join('');
         }
 
-        function renderMangaGrid(mangaList) {
+        function renderMangaGrid(mangaList, searchQuery = '') {
             const grid = document.getElementById('mangaGrid');
             if (mangaList.length === 0) {
-                grid.innerHTML = '<div class="empty-state"><i class="fa-solid fa-box-open"></i> No manga posted yet.</div>';
+                if (searchQuery) {
+                    grid.innerHTML = `<div class="empty-state"><i class="fa-solid fa-magnifying-glass"></i> No manga found matching "${searchQuery}"</div>`;
+                } else {
+                    grid.innerHTML = '<div class="empty-state"><i class="fa-solid fa-box-open"></i> No manga posted yet.</div>';
+                }
                 return;
             }
             grid.innerHTML = mangaList.map(m => {
@@ -856,7 +916,6 @@
                     </div>
                 </div>
             `}).join('');
-            window.currentMangaCache = mangaList;
         }
 
         async function handleSaveManga(e) {
