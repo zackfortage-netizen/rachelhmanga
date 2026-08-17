@@ -65,22 +65,17 @@
             border: 2px solid #38bdf8;
         }
 
-        /* NÚT SUPPORT ĐƯỢC CỐ ĐỊNH Ở GÓC DƯỚI BÊN TRÁI */
+        /* NÚT SUPPORT ME Ở GÓC TRÊN BÊN PHẢI (TRONG HEADER) */
         .support-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 999;
             display: inline-flex;
             align-items: center;
             background-color: #f96854;
             color: #ffffff;
-            padding: 0.6rem 1.2rem;
-            border-radius: 25px;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
             text-decoration: none;
             font-weight: 600;
-            font-size: 0.95rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            font-size: 0.9rem;
             transition: background-color 0.2s, transform 0.2s;
         }
 
@@ -406,13 +401,15 @@
             </a>
         </div>
 
-        <div class="user-actions" id="userActions"></div>
+        <div class="user-actions">
+            <!-- NÚT SUPPORT ME Ở GÓC TRÊN BÊN PHẢI -->
+            <a href="https://www.patreon.com/cw/rachelanimation" target="_blank" rel="noopener noreferrer"
+                class="support-btn" id="patreonLink">
+                Support me
+            </a>
+            <div id="userActions"></div>
+        </div>
     </header>
-
-    <!-- NÚT SUPPORT ME ĐÃ ĐƯỢC CHUYỂN XUỐNG GÓC DƯỚI BÊN TRÁI, KHÔNG CÓ LOGO PATREON -->
-    <a href="https://www.patreon.com" target="_blank" rel="noopener noreferrer" class="support-btn" id="patreonLink">
-        Support me
-    </a>
 
     <div class="container">
         <!-- ADMIN DASHBOARD -->
@@ -430,7 +427,8 @@
                     <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
                         <div class="input-group" style="flex: 1; min-width: 250px; margin-bottom:0;">
                             <label>Enter Patreon / Support URL</label>
-                            <input type="url" id="patreonUrlInput" placeholder="https://www.patreon.com/your-page">
+                            <input type="url" id="patreonUrlInput"
+                                placeholder="https://www.patreon.com/cw/rachelanimation">
                         </div>
                         <button type="submit" id="btnUpdatePatreon" class="btn-submit"
                             style="width: auto; padding: 0.75rem 1.5rem;">
@@ -615,6 +613,8 @@
             if (localPatreon) {
                 document.getElementById('patreonLink').href = localPatreon;
                 document.getElementById('patreonUrlInput').value = localPatreon;
+            } else {
+                document.getElementById('patreonUrlInput').value = "https://www.patreon.com/cw/rachelanimation";
             }
 
             if (db) {
