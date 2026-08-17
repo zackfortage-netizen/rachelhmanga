@@ -1096,6 +1096,13 @@
         listenToPatreonChanges();
         loadMangaData();
     </script>
+
+    <!-- Mã đăng ký Monetag Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js');
+      }
+    </script>
 </body>
 
 </html>
