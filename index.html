@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rachelHmanga - Online Cloud Edition</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase SDK (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0b0f19;
+            color: #f1f5f9;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #0f172a;
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+        }
+
+        .logo-text {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #38bdf8;
+        }
+
+        .logo-text span {
+            color: #f97316;
+        }
+
+        .logo-img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #38bdf8;
+        }
+
+        .support-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #f96854;
+            color: #ffffff;
+            padding: 0.4rem 0.9rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .support-btn:hover {
+            background-color: #e85b46;
+            transform: translateY(-2px);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .admin-status {
+            color: #10b981;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background-color: #ef4444;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #38bdf8;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 0.5rem;
+        }
+
+        .admin-panel {
+            background-color: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .admin-card {
+            background-color: #1e293b;
+            border-radius: 8px;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #334155;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            border: 1px solid #1e293b;
+            padding: 0.75rem;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .admin-table th {
+            background-color: #1e293b;
+            color: #38bdf8;
+        }
+
+        .admin-thumb-preview {
+            width: 45px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .manga-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .manga-card {
+            background-color: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .manga-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2);
+        }
+
+        .manga-thumb {
+            width: 100%;
+            height: 240px;
+            background-color: #334155;
+            position: relative;
+        }
+
+        .manga-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .manga-pages-count {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(15, 23, 42, 0.85);
+            color: #38bdf8;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .manga-views-count {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(15, 23, 42, 0.85);
+            color: #10b981;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .manga-info {
+            padding: 0.8rem;
+        }
+
+        .manga-info h3 {
+            font-size: 1rem;
+            color: #f1f5f9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .auth-card {
+            background-color: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1.2rem;
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .input-group input {
+            padding: 0.75rem;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            color: white;
+        }
+
+        .btn-submit {
+            background-color: #f97316;
+            color: white;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-action-edit {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 0.3rem;
+        }
+
+        .btn-action-delete {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .reader-card {
+            background-color: #0b0f19;
+            width: 95vw;
+            max-width: 1200px;
+            height: 98vh;
+            display: flex;
+            flex-direction: column;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .reader-header {
+            padding: 1rem;
+            background-color: #0f172a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .reader-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        .reader-content img {
+            max-width: 100%;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .scroll-top-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: #38bdf8;
+            color: #0f172a;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #64748b;
+            grid-column: 1 / -1;
+            padding: 3rem 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-left">
+            <a href="#" class="logo-container">
+                <img id="siteLogo" src="image_bbe960.jpg" alt="Rachel Logo" class="logo-img"
+                    onerror="this.onerror=null; this.src='https://via.placeholder.com/42/38bdf8/ffffff?text=R';">
+                <span class="logo-text">rachel<span>Hmanga</span></span>
+            </a>
+
+            <!-- NÚT SUPPORT VỚI LINK MẶC ĐỊNH SẼ ĐƯỢC ĐỔI BẰNG LINK PATREON CỦA BẠN -->
+            <a href="https://www.patreon.com" target="_blank" rel="noopener noreferrer" class="support-btn"
+                id="patreonLink">
+                <i class="fa-brands fa-patreon"></i> Support
+            </a>
+        </div>
+
+        <div class="user-actions" id="userActions"></div>
+    </header>
+
+    <div class="container">
+        <!-- ADMIN DASHBOARD -->
+        <div class="admin-panel" id="adminSection" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2><i class="fa-solid fa-user-gear"></i> Cloud Admin Panel</h2>
+            </div>
+
+            <!-- PATREON URL CONFIGURATION -->
+            <div class="admin-card">
+                <h3 style="color:#38bdf8; margin-bottom:0.8rem; font-size:1.1rem;">
+                    <i class="fa-brands fa-patreon"></i> Support / Patreon URL Configuration
+                </h3>
+                <form id="patreonForm" onsubmit="handleUpdatePatreon(event)">
+                    <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+                        <div class="input-group" style="flex: 1; min-width: 250px; margin-bottom:0;">
+                            <label>Enter Patreon / Support URL</label>
+                            <input type="url" id="patreonUrlInput" placeholder="https://www.patreon.com/your-page">
+                        </div>
+                        <button type="submit" id="btnUpdatePatreon" class="btn-submit"
+                            style="width: auto; padding: 0.75rem 1.5rem;">
+                            Update Support Link
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- LOGO CONFIGURATION -->
+            <div class="admin-card">
+                <h3 style="color:#38bdf8; margin-bottom:0.8rem; font-size:1.1rem;">
+                    <i class="fa-solid fa-image"></i> Site Logo Configuration
+                </h3>
+                <form id="logoForm" onsubmit="handleUpdateLogo(event)">
+                    <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+                        <div class="input-group" style="flex: 1; min-width: 200px; margin-bottom:0;">
+                            <label>Select logo image from device (&lt; 1MB)</label>
+                            <input type="file" id="logoFileInput" accept="image/*">
+                        </div>
+                        <div class="input-group" style="flex: 1; min-width: 200px; margin-bottom:0;">
+                            <label>Or enter image URL</label>
+                            <input type="url" id="logoUrlInput" placeholder="https://example.com/logo.png">
+                        </div>
+                        <button type="submit" id="btnUpdateLogo" class="btn-submit"
+                            style="width: auto; padding: 0.75rem 1.5rem;">
+                            Update Logo
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- PUBLISH NEW MANGA -->
+            <button onclick="openMangaModal()" class="btn-submit"
+                style="width: auto; padding: 0.6rem 1rem; margin-bottom: 1rem;">
+                <i class="fa-solid fa-plus"></i> Add New Manga
+            </button>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Cover</th>
+                        <th>Title</th>
+                        <th>Chapter</th>
+                        <th>Pages</th>
+                        <th>Views</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="mangaTableBody"></tbody>
+            </table>
+        </div>
+
+        <h2 class="section-title"><i class="fa-solid fa-fire"></i> LATEST ONLINE UPDATES</h2>
+        <div class="manga-grid" id="mangaGrid">
+            <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> Loading manga list...</div>
+        </div>
+    </div>
+
+    <!-- ADMIN LOGIN MODAL -->
+    <div class="modal-overlay" id="adminLoginModal">
+        <div class="auth-card">
+            <button class="close-btn" onclick="closeAdminLogin()"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="color:#38bdf8; margin-bottom:1rem;"><i class="fa-solid fa-shield-halved"></i> Admin Login</h2>
+            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+                <div class="input-group">
+                    <label>Admin Username</label>
+                    <input type="text" id="adminEmailInput" autocomplete="username" placeholder="Enter username"
+                        required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="adminPasswordInput" autocomplete="current-password"
+                        placeholder="Enter password" required>
+                </div>
+                <button type="submit" id="adminLoginBtn" class="btn-submit">Login</button>
+                <p id="adminLoginError" style="color:#ef4444; margin-top:.8rem; font-size:.9rem;"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- PUBLISH / UPDATE MANGA MODAL -->
+    <div class="modal-overlay" id="mangaModal">
+        <div class="auth-card">
+            <button class="close-btn" onclick="closeMangaModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h2 id="mangaModalTitle" style="color: #38bdf8; margin-bottom: 1rem;">Add New Manga</h2>
+
+            <form id="mangaForm" onsubmit="handleSaveManga(event)">
+                <input type="hidden" id="editingMangaId" value="">
+                <div class="input-group">
+                    <label>Manga Title</label>
+                    <input type="text" id="mangaTitleInput" required>
+                </div>
+                <div class="input-group">
+                    <label>Latest Chapter</label>
+                    <input type="text" id="mangaChapterInput" required>
+                </div>
+                <div class="input-group">
+                    <label id="mangaFilesLabel">Select Chapter Pages</label>
+                    <input type="file" id="mangaFilesInput" accept="image/*" multiple>
+                    <small id="mangaFilesHelp" style="color:#94a3b8; font-size:0.75rem; margin-top:0.2rem;"></small>
+                </div>
+                <button type="submit" id="btnSubmitManga" class="btn-submit">Upload to Cloud</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- READER MODAL -->
+    <div class="modal-overlay" id="readerModal">
+        <div class="reader-card">
+            <div class="reader-header">
+                <div>
+                    <h3 id="readerTitle" style="color: #38bdf8;">---</h3>
+                    <p id="readerChapter" style="font-size: 0.85rem; color: #94a3b8;">---</p>
+                </div>
+                <button class="close-btn" style="position: static;" onclick="closeReaderModal()"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="reader-content" id="readerContent"></div>
+            <button class="scroll-top-btn" onclick="scrollToTopReader()"><i class="fa-solid fa-arrow-up"></i></button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBCBrz4OwnObaMX97Y70YbwClv6La6If7M",
+            authDomain: "rachelhmanga.firebaseapp.com",
+            projectId: "rachelhmanga",
+            storageBucket: "rachelhmanga.firebasestorage.app",
+            messagingSenderId: "21639914736",
+            appId: "1:21639914736:web:0a97578a4ab57d5a660e35",
+            measurementId: "G-QPTHEH73HY"
+        };
+
+        let db = null;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+        } catch (e) {
+            console.error("Firebase initialization error:", e);
+        }
+
+        const ADMIN_USER = "adminrachelgardner";
+        const ADMIN_PASS = "1234567890!@#$%^&*()";
+
+        let isAdminLoggedIn = sessionStorage.getItem('isAdminLoggedIn') === 'true';
+
+        function checkAdminState() {
+            const admin = document.getElementById('adminSection');
+            const actions = document.getElementById('userActions');
+            if (isAdminLoggedIn) {
+                admin.style.display = 'block';
+                actions.innerHTML = '<span class="admin-status"><i class="fa-solid fa-circle-check"></i> Admin</span><button class="logout-btn" onclick="logoutAdmin()">Logout</button>';
+            } else {
+                admin.style.display = 'none';
+                actions.innerHTML = '';
+            }
+        }
+
+        function listenToLogoChanges() {
+            const localLogo = localStorage.getItem('site_logo_url');
+            if (localLogo) {
+                document.getElementById('siteLogo').src = localLogo;
+            }
+
+            if (db) {
+                db.collection("settings").doc("site_config").onSnapshot((doc) => {
+                    if (doc.exists && doc.data().logoUrl) {
+                        const cloudLogo = doc.data().logoUrl;
+                        document.getElementById('siteLogo').src = cloudLogo;
+                        localStorage.setItem('site_logo_url', cloudLogo);
+                    }
+                }, (error) => {
+                    console.log("Using default or local storage logo.");
+                });
+            }
+        }
+
+        function listenToPatreonChanges() {
+            const localPatreon = localStorage.getItem('site_patreon_url');
+            if (localPatreon) {
+                document.getElementById('patreonLink').href = localPatreon;
+                document.getElementById('patreonUrlInput').value = localPatreon;
+            }
+
+            if (db) {
+                db.collection("settings").doc("site_config").onSnapshot((doc) => {
+                    if (doc.exists && doc.data().patreonUrl) {
+                        const cloudPatreon = doc.data().patreonUrl;
+                        document.getElementById('patreonLink').href = cloudPatreon;
+                        document.getElementById('patreonUrlInput').value = cloudPatreon;
+                        localStorage.setItem('site_patreon_url', cloudPatreon);
+                    }
+                }, (error) => {
+                    console.log("Using default or local storage patreon link.");
+                });
+            }
+        }
+
+        async function handleUpdatePatreon(e) {
+            e.preventDefault();
+            if (!isAdminLoggedIn) {
+                alert('You do not have admin permissions!');
+                return;
+            }
+
+            const patreonUrl = document.getElementById('patreonUrlInput').value.trim();
+            const btn = document.getElementById('btnUpdatePatreon');
+
+            if (!patreonUrl) {
+                alert("Please enter a valid URL!");
+                return;
+            }
+
+            try {
+                btn.disabled = true;
+                btn.textContent = "Updating...";
+
+                document.getElementById('patreonLink').href = patreonUrl;
+                localStorage.setItem('site_patreon_url', patreonUrl);
+
+                if (db) {
+                    await db.collection("settings").doc("site_config").set({
+                        patreonUrl: patreonUrl,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, {merge: true});
+                }
+
+                alert("🎉 Patreon link updated successfully!");
+            } catch (err) {
+                alert("Update error: " + err.message + "\nPlease make sure Firestore Rules are set to public read/write.");
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Update Support Link";
+            }
+        }
+
+        function compressImage(file, maxWidth = 800, quality = 0.65) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                        resolve(compressedBase64);
+                    };
+                    img.onerror = (err) => reject(err);
+                };
+                reader.onerror = (err) => reject(err);
+            });
+        }
+
+        async function handleUpdateLogo(e) {
+            e.preventDefault();
+            if (!isAdminLoggedIn) {
+                alert('You do not have admin permissions!');
+                return;
+            }
+
+            const fileInput = document.getElementById('logoFileInput');
+            const urlInput = document.getElementById('logoUrlInput');
+            const btn = document.getElementById('btnUpdateLogo');
+            let newLogoUrl = "";
+
+            try {
+                btn.disabled = true;
+                btn.textContent = "Processing...";
+
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    newLogoUrl = await compressImage(file, 300, 0.7);
+                } else if (urlInput.value.trim() !== "") {
+                    newLogoUrl = urlInput.value.trim();
+                } else {
+                    alert("Please select an image file or enter an image URL!");
+                    btn.disabled = false;
+                    btn.textContent = "Update Logo";
+                    return;
+                }
+
+                document.getElementById('siteLogo').src = newLogoUrl;
+                localStorage.setItem('site_logo_url', newLogoUrl);
+
+                if (db) {
+                    await db.collection("settings").doc("site_config").set({
+                        logoUrl: newLogoUrl,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, {merge: true});
+                }
+
+                alert("🎉 Website logo updated successfully!");
+                document.getElementById('logoForm').reset();
+            } catch (err) {
+                alert("Update error: " + err.message);
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Update Logo";
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+                e.preventDefault();
+                openAdminLogin();
+            }
+            if (e.key === 'Escape') {
+                closeAdminLogin();
+                closeMangaModal();
+                closeReaderModal();
+            }
+        });
+
+        function openAdminLogin() {document.getElementById('adminLoginModal').classList.add('active');}
+        function closeAdminLogin() {
+            document.getElementById('adminLoginModal').classList.remove('active');
+            document.getElementById('adminLoginForm').reset();
+            document.getElementById('adminLoginError').textContent = '';
+        }
+
+        async function handleAdminLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('adminEmailInput').value.trim();
+            const password = document.getElementById('adminPasswordInput').value;
+            const error = document.getElementById('adminLoginError');
+            error.textContent = '';
+
+            if (username === ADMIN_USER && password === ADMIN_PASS) {
+                isAdminLoggedIn = true;
+                sessionStorage.setItem('isAdminLoggedIn', 'true');
+                checkAdminState();
+                closeAdminLogin();
+            } else {
+                error.textContent = 'Incorrect username or password.';
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            sessionStorage.removeItem('isAdminLoggedIn');
+            checkAdminState();
+        }
+
+        function loadMangaData() {
+            if (!db) return;
+            db.collection("manga").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
+                const mangaList = [];
+                snapshot.forEach((doc) => {
+                    mangaList.push({id: doc.id, ...doc.data()});
+                });
+                renderAdminTable(mangaList);
+                renderMangaGrid(mangaList);
+            }, (error) => {
+                console.error("Firestore connection error:", error);
+                document.getElementById('mangaGrid').innerHTML = '<div class="empty-state">⚠️ Please make sure Rules (access permissions) are enabled in Firestore Console.</div>';
+            });
+        }
+
+        function renderAdminTable(mangaList) {
+            const tbody = document.getElementById('mangaTableBody');
+            if (mangaList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No data available.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = mangaList.map(m => {
+                const thumb = m.cover || (m.pages && m.pages[0]) || '';
+                const count = m.pageCount || (m.pages ? m.pages.length : 0);
+                const views = m.views || 0;
+                return `
+                <tr>
+                    <td><img src="${thumb}" class="admin-thumb-preview" onerror="this.src='https://via.placeholder.com/45x60?text=No+Img'"></td>
+                    <td><b>${m.title}</b></td>
+                    <td>${m.chapter}</td>
+                    <td>${count} pages</td>
+                    <td><i class="fa-solid fa-eye" style="color:#10b981;"></i> ${views}</td>
+                    <td>
+                        <button onclick="openEditMangaModal('${m.id}')" class="btn-action-edit"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                        <button onclick="deleteManga('${m.id}')" class="btn-action-delete"><i class="fa-solid fa-trash"></i> Delete</button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        function renderMangaGrid(mangaList) {
+            const grid = document.getElementById('mangaGrid');
+            if (mangaList.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><i class="fa-solid fa-box-open"></i> No manga posted yet.</div>';
+                return;
+            }
+            grid.innerHTML = mangaList.map(m => {
+                const thumb = m.cover || (m.pages && m.pages[0]) || '';
+                const count = m.pageCount || (m.pages ? m.pages.length : 0);
+                const views = m.views || 0;
+                return `
+                <div class="manga-card" onclick="openReaderModal('${m.id}')">
+                    <div class="manga-thumb">
+                        <div class="manga-pages-count">${count} pages</div>
+                        <div class="manga-views-count"><i class="fa-solid fa-eye"></i> ${views}</div>
+                        <img src="${thumb}" alt="${m.title}" onerror="this.src='https://via.placeholder.com/180x240?text=No+Cover'">
+                    </div>
+                    <div class="manga-info">
+                        <h3>${m.title}</h3>
+                        <p style="color:#38bdf8; font-size:0.85rem;">${m.chapter}</p>
+                    </div>
+                </div>
+            `}).join('');
+            window.currentMangaCache = mangaList;
+        }
+
+        async function handleSaveManga(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editingMangaId').value;
+            const title = document.getElementById('mangaTitleInput').value.trim();
+            const chapter = document.getElementById('mangaChapterInput').value.trim();
+            const files = document.getElementById('mangaFilesInput').files;
+
+            if (!editId && files.length === 0) return alert('Please select at least 1 page image!');
+            if (!db) return alert('Firebase Database connection error!');
+
+            const btnSubmit = document.getElementById('btnSubmitManga');
+            btnSubmit.disabled = true;
+
+            try {
+                let pageDataArray = [];
+
+                if (files.length > 0) {
+                    for (let i = 0; i < files.length; i++) {
+                        btnSubmit.textContent = `Processing page (${i + 1}/${files.length})...`;
+                        const compressedBase64 = await compressImage(files[i], 800, 0.65);
+                        pageDataArray.push({index: i, data: compressedBase64});
+                    }
+                }
+
+                btnSubmit.textContent = "Uploading to Cloud...";
+
+                if (editId) {
+                    const updateObj = {
+                        title: title,
+                        chapter: chapter,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    if (pageDataArray.length > 0) {
+                        updateObj.cover = pageDataArray[0].data;
+                        updateObj.pageCount = pageDataArray.length;
+                    }
+                    await db.collection("manga").doc(editId).update(updateObj);
+
+                    if (pageDataArray.length > 0) {
+                        const oldPages = await db.collection("manga").doc(editId).collection("pages").get();
+                        const batch = db.batch();
+                        oldPages.forEach(doc => batch.delete(doc.ref));
+                        await batch.commit();
+
+                        for (const page of pageDataArray) {
+                            await db.collection("manga").doc(editId).collection("pages").doc(`page_${page.index}`).set(page);
+                        }
+                    }
+                    alert('🎉 Manga updated successfully!');
+                } else {
+                    const newDocRef = await db.collection("manga").add({
+                        title: title,
+                        chapter: chapter,
+                        cover: pageDataArray[0].data,
+                        pageCount: pageDataArray.length,
+                        views: 0,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    for (const page of pageDataArray) {
+                        await db.collection("manga").doc(newDocRef.id).collection("pages").doc(`page_${page.index}`).set(page);
+                    }
+                    alert('🎉 Manga published successfully!');
+                }
+
+                closeMangaModal();
+            } catch (error) {
+                alert('Error saving data: ' + error.message);
+                console.error(error);
+            } finally {
+                btnSubmit.textContent = "Upload to Cloud";
+                btnSubmit.disabled = false;
+            }
+        }
+
+        function openMangaModal() {
+            document.getElementById('mangaModalTitle').textContent = "Add New Manga";
+            document.getElementById('editingMangaId').value = "";
+            document.getElementById('mangaForm').reset();
+            document.getElementById('mangaFilesInput').required = true;
+            document.getElementById('mangaFilesHelp').textContent = "";
+            document.getElementById('btnSubmitManga').textContent = "Upload to Cloud";
+            document.getElementById('mangaModal').classList.add('active');
+        }
+
+        function openEditMangaModal(id) {
+            const manga = (window.currentMangaCache || []).find(m => m.id === id);
+            if (!manga) return;
+
+            document.getElementById('mangaModalTitle').textContent = "Update Manga Details";
+            document.getElementById('editingMangaId').value = id;
+            document.getElementById('mangaTitleInput').value = manga.title || "";
+            document.getElementById('mangaChapterInput').value = manga.chapter || "";
+            document.getElementById('mangaFilesInput').value = "";
+            document.getElementById('mangaFilesInput').required = false;
+            document.getElementById('mangaFilesHelp').textContent = "Leave blank if you do not wish to replace current page images.";
+            document.getElementById('btnSubmitManga').textContent = "Update Data";
+            document.getElementById('mangaModal').classList.add('active');
+        }
+
+        function closeMangaModal() {
+            document.getElementById('mangaModal').classList.remove('active');
+            document.getElementById('mangaForm').reset();
+            document.getElementById('editingMangaId').value = "";
+        }
+
+        async function deleteManga(id) {
+            if (!isAdminLoggedIn) {
+                alert('You do not have admin permissions.');
+                return;
+            }
+            if (!db) return;
+            if (confirm("Delete this manga from Cloud Database?")) {
+                try {
+                    const pages = await db.collection("manga").doc(id).collection("pages").get();
+                    const batch = db.batch();
+                    pages.forEach(doc => batch.delete(doc.ref));
+                    await batch.commit();
+
+                    await db.collection("manga").doc(id).delete();
+                } catch (e) {
+                    console.error("Delete error:", e);
+                    alert("Error deleting: " + e.message);
+                }
+            }
+        }
+
+        async function openReaderModal(id) {
+            const manga = (window.currentMangaCache || []).find(m => m.id === id);
+            if (!manga) return;
+
+            document.getElementById('readerTitle').textContent = manga.title;
+            document.getElementById('readerChapter').textContent = manga.chapter;
+            document.getElementById('readerContent').innerHTML = '<div style="color:#38bdf8; padding:3rem; text-align:center;"><i class="fa-solid fa-spinner fa-spin"></i> Loading manga pages...</div>';
+            document.getElementById('readerModal').classList.add('active');
+
+            if (db) {
+                db.collection("manga").doc(id).update({
+                    views: firebase.firestore.FieldValue.increment(1)
+                }).catch(err => console.log("Error updating view count:", err));
+            }
+
+            try {
+                const snapshot = await db.collection("manga").doc(id).collection("pages").orderBy("index").get();
+                if (snapshot.empty) {
+                    if (manga.pages && manga.pages.length > 0) {
+                        document.getElementById('readerContent').innerHTML = manga.pages.map((url, idx) => `
+                            <img src="${url}" alt="Page ${idx + 1}" loading="lazy">
+                        `).join('');
+                        return;
+                    }
+                    document.getElementById('readerContent').innerHTML = '<p style="color:#ef4444; padding:2rem;">No page content available.</p>';
+                    return;
+                }
+
+                let html = '';
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    html += `<img src="${data.data}" alt="Page ${data.index + 1}" loading="lazy">`;
+                });
+                document.getElementById('readerContent').innerHTML = html;
+            } catch (err) {
+                console.error(err);
+                document.getElementById('readerContent').innerHTML = '<p style="color:#ef4444; padding:2rem;">Connection error loading manga content.</p>';
+            }
+        }
+
+        function scrollToTopReader() {
+            document.getElementById('readerContent').scrollTop = 0;
+        }
+
+        function closeReaderModal() {document.getElementById('readerModal').classList.remove('active');}
+
+        checkAdminState();
+        listenToLogoChanges();
+        listenToPatreonChanges();
+        loadMangaData();
+    </script>
+</body>
+
+</html>
