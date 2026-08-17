@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>rachelHmanga - Online Cloud Edition</title>
 
-    <!-- Monetag Tag -->
-    <script>(function(s){s.dataset.zone='11595048',s.src='https://zovidree.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+    <!-- Monetag Multitag Script -->
+    <script src="https://quge5.com/88/tag.min.js" data-zone="270820" async data-cfasync="false"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -847,14 +847,13 @@
                 });
                 window.currentMangaCache = mangaList;
                 renderAdminTable(mangaList);
-                filterManga(); // Áp dụng bộ lọc tìm kiếm nếu đang gõ
+                filterManga();
             }, (error) => {
                 console.error("Firestore connection error:", error);
                 document.getElementById('mangaGrid').innerHTML = '<div class="empty-state">⚠️ Please make sure Rules (access permissions) are enabled in Firestore Console.</div>';
             });
         }
 
-        /* HÀM LỌC TRUYỆN THEO TÊN */
         function filterManga() {
             const query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
             const allManga = window.currentMangaCache || [];
