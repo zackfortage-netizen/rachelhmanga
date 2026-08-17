@@ -65,17 +65,22 @@
             border: 2px solid #38bdf8;
         }
 
+        /* NÚT SUPPORT ĐƯỢC CỐ ĐỊNH Ở GÓC DƯỚI BÊN TRÁI */
         .support-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 999;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
             background-color: #f96854;
             color: #ffffff;
-            padding: 0.4rem 0.9rem;
-            border-radius: 20px;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
             text-decoration: none;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             transition: background-color 0.2s, transform 0.2s;
         }
 
@@ -399,16 +404,15 @@
                     onerror="this.onerror=null; this.src='https://via.placeholder.com/42/38bdf8/ffffff?text=R';">
                 <span class="logo-text">rachel<span>Hmanga</span></span>
             </a>
-
-            <!-- NÚT SUPPORT VỚI LINK MẶC ĐỊNH SẼ ĐƯỢC ĐỔI BẰNG LINK PATREON CỦA BẠN -->
-            <a href="https://www.patreon.com" target="_blank" rel="noopener noreferrer" class="support-btn"
-                id="patreonLink">
-                <i class="fa-brands fa-patreon"></i> Support
-            </a>
         </div>
 
         <div class="user-actions" id="userActions"></div>
     </header>
+
+    <!-- NÚT SUPPORT ME ĐÃ ĐƯỢC CHUYỂN XUỐNG GÓC DƯỚI BÊN TRÁI, KHÔNG CÓ LOGO PATREON -->
+    <a href="https://www.patreon.com" target="_blank" rel="noopener noreferrer" class="support-btn" id="patreonLink">
+        Support me
+    </a>
 
     <div class="container">
         <!-- ADMIN DASHBOARD -->
@@ -656,7 +660,7 @@
                     }, {merge: true});
                 }
 
-                alert("🎉 Patreon link updated successfully!");
+                alert("🎉 Support link updated successfully!");
             } catch (err) {
                 alert("Update error: " + err.message + "\nPlease make sure Firestore Rules are set to public read/write.");
                 console.error(err);
